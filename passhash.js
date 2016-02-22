@@ -7,7 +7,8 @@ var crypto = require('crypto'),
   ITERATIONS = 1000, // hashing constants
   SALT_LEN = 24,
   HASH_LEN = 24,
-  ALGORITHM = 'sha1'
+  ALGORITHM = 'sha1',
+  assert = require('assert')
 
 // should be constant time, see net.crackstation
 function constCompare(buf1, buf2) {
@@ -31,9 +32,9 @@ function hashParts(s) {
 }
 
 module.exports = {
-  config: function (opts) {
+  configure: function (opts) {
     if (opts.iterations && typeof opts.iterations === 'number') ITERATIONS = opts.iterations
-    if (opts.algorithm && typeof opts.iterations === 'string') ALGORITHM = opts.algorithm
+    if (opts.algorithm && typeof opts.algorithm === 'string') ALGORITHM = opts.algorithm
     if (opts.saltLength && typeof opts.saltLength === 'number') SALT_LEN = opts.saltLength
     HASH_LEN = SALT_LEN
   },
@@ -85,7 +86,3 @@ module.exports = {
     }
   }
 }
-
-module.exports.generate('secret', function (hashed) {
-  console.log('hashed')
-})

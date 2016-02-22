@@ -22,7 +22,7 @@ passhash.generate('secret', function (err, hashed) {
 ### Options
 
 * `iterations` - Default is 1000
-* `algorithm` - Defaults to `'sha1'`
+* `algorithm` - Defaults to `'sha1'`. Can be any algorithm returned by ``crypto.getHashes``.
 * `saltLength` - Default is 24
 
 
