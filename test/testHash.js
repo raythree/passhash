@@ -6,19 +6,21 @@ describe('password hashing tests', function () {
   it('should generate hashed passwords and verify with defaults', function (done) {
     passhash.generate('secret', function (err, hashed) {
       assert(!err)
-      assert(hashed)
-      console.log(hashed)
-      passhash.verify('secret', hashed, function (err, ok) {
-        console.log(ok)
+      console.log('hash generated: ' + hashed);  
+      passhash.verify('secret', hashed, function (err, ok) {        
+        console.log('hashed ' + hashed + ' for secret ' + ' returned ' + ok)
         assert(ok)
+        // configure different algorithm, make sure it uses sha1 stored in hashed
+        passhash.configure({ algorithm: 'sha256' });
         passhash.verify('secret1', hashed, function (err, ok) {
+          assert(passhash.getConfig().algorithm === 'sha256');
           assert(!ok)
           console.log(ok)
           done()
         })
       })
     })
-  })
+  });
 
   it('should generate hashed passwords and verify using options', function (done) {
     passhash.configure({
@@ -32,20 +34,20 @@ describe('password hashing tests', function () {
     assert(opts.iterations === 3000)
     assert(opts.algorithm === 'sha256')
 
-    passhash.generate('secret', function (err, hashed) {
+    passhash.generate('secret', function (err, h) {
       if (err) console.log('ERROR in generate: ' + err)
-      console.log(hashed)
-      assert(hashed)
-      passhash.verify('secret', hashed, function (err, ok) {
-        if (err) console.log('ERROR in verify: ' + err)
+      console.log(h)
+      assert(h)
+      passhash.verify('secret', h, function (err, ok) {
+        if (err) console.log('ERROR ind verify: ' + err)
         console.log(ok)
         assert(ok)
-        passhash.verify('secret1', hashed, function (err, ok) {
+        passhash.verify('secret1', h, function (err, ok) {
           assert(!ok)
           console.log(ok)
           done()
         })
       })
-    })
-  })  
+    });
+  });
 })

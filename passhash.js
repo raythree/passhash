@@ -7,8 +7,7 @@ var crypto = require('crypto'),
   ITERATIONS = 1000, // hashing constants
   SALT_LEN = 24,
   HASH_LEN = 24,
-  ALGORITHM = 'sha1',
-  assert = require('assert')
+  ALGORITHM = 'sha1';
 
 // should be constant time, see net.crackstation
 function constCompare(buf1, buf2) {
@@ -19,15 +18,18 @@ function constCompare(buf1, buf2) {
 }
 
 function hashParts(s) {
-  var res = {iterations: 0, salt: '', hash: ''}, parts;
+  var res = { iterations: 0, salt: '', hash: '', alg: ALGORITHM }, parts;
   if (!s) return res;
   parts = s.split(':');
-  if (parts.length !== 3) return res;
+  if (parts.length < 3) return res;
   iterations = parseInt(parts[0]);
   if (iterations <= 0) return res;
   res.iterations = iterations;
   res.salt = new Buffer(parts[1], 'hex');
   res.hash = new Buffer(parts[2], 'hex');
+  if (parts.length === 4) {
+    res.alg = parts[3];
+  }
   return res;
 }
 
@@ -46,9 +48,9 @@ module.exports = {
     crypto.randomBytes(SALT_LEN, function(err, sbuf) {
       if (err) return cb(err);
       var salt = sbuf.toString('hex');
-      crypto.pbkdf2(pass, salt, ITERATIONS, HASH_LEN, ALGORITHM, function (err, key) {
+      crypto.pbkdf2(pass, sbuf, ITERATIONS, HASH_LEN, ALGORITHM, function (err, key) {
         if (err) cb(err);
-        cb(null, ITERATIONS + ':' + salt + ':' + key.toString('hex'));
+        cb(null, ITERATIONS + ':' + salt.toString('hex') + ':' + key.toString('hex') + ':' + ALGORITHM);
       });
     });
   },
@@ -63,7 +65,7 @@ module.exports = {
 
     parts = hashParts(hashedPass);
     if (!parts.iterations) return cb('invalid hash value');
-    crypto.pbkdf2(pass, parts.salt.toString('hex'), parts.iterations, HASH_LEN, ALGORITHM, function (err, res) {
+    crypto.pbkdf2(pass, parts.salt, parts.iterations, HASH_LEN, parts.alg, function (err, res) {
       if (err) return cb(err);
       cb(null, constCompare(parts.hash, res));
     });
